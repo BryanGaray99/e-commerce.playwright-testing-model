@@ -18,7 +18,17 @@
     "test:orders": "cucumber-js --config cucumber.cjs --profile orders",
     "test:categories": "cucumber-js --config cucumber.cjs --profile categories",
     "test:cart": "cucumber-js --config cucumber.cjs --profile cart",
-    "test:single": "cucumber-js --config cucumber.cjs --profile products --tags"
+    "test:single": "cucumber-js --config cucumber.cjs --profile products --tags",
+    "test:scenario": "cucumber-js --config cucumber.cjs --name",
+    "test:create": "cucumber-js --config cucumber.cjs --tags @create",
+    "test:read": "cucumber-js --config cucumber.cjs --tags @read",
+    "test:update": "cucumber-js --config cucumber.cjs --tags @update",
+    "test:delete": "cucumber-js --config cucumber.cjs --tags @delete",
+    "test:negative": "cucumber-js --config cucumber.cjs --tags @negative",
+    "test:create-smoke": "cucumber-js --config cucumber.cjs --tags @create and @smoke",
+    "test:read-smoke": "cucumber-js --config cucumber.cjs --tags @read and @smoke",
+    "test:update-smoke": "cucumber-js --config cucumber.cjs --tags @update and @smoke",
+    "test:delete-smoke": "cucumber-js --config cucumber.cjs --tags @delete and @smoke"
   },
   "keywords": [
     "api-testing",

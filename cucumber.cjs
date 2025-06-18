@@ -3,10 +3,9 @@ const common = [
   '--require-module ts-node/register',
   '--require src/steps/**/*.ts',
   '--require src/steps/ecommerce_steps/**/*.ts',
-  '--format progress-bar',
+  '--format @cucumber/pretty-formatter',
   '--format json:test-results/cucumber-report.json',
-  '--format html:test-results/cucumber-report.html',
-  '--publish-quiet'
+  '--format html:test-results/cucumber-report.html'
 ].join(' ');
 
 module.exports = {

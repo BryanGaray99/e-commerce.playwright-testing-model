@@ -153,6 +153,14 @@ export function handleApiResponse(response: any, error?: any) {
   if (error) {
     testData.lastError = error;
     testData.lastResponse = null;
+  } else if (response && response.status >= 400) {
+    // Treat 4xx and 5xx status codes as errors
+    testData.lastError = {
+      status: response.status,
+      message: response.data?.message || 'HTTP Error',
+      response: response
+    };
+    testData.lastResponse = null;
   } else {
     testData.lastResponse = response;
     testData.lastError = null;

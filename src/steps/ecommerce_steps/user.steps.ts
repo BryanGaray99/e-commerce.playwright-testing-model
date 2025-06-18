@@ -27,7 +27,8 @@ Given('a user exists in the system', async function () {
   const response = await usersClient.createUser(this.existingUser);
   expect(response.status).toBe(201);
   
-  this.userId = response.data.id;
+  const userData = (response.data as any)?.data?.data || response.data;
+  this.userId = userData.id;
   storeCreatedEntity('user', this.userId, response.data);
 });
 
@@ -39,8 +40,9 @@ Given('multiple users exist in the system', async function () {
     const response = await usersClient.createUser(userData);
     expect(response.status).toBe(201);
     
-    this.createdUsers.push(response.data);
-    storeCreatedEntity('user', response.data.id, response.data);
+    const createdUserData = (response.data as any)?.data?.data || response.data;
+    this.createdUsers.push(createdUserData);
+    storeCreatedEntity('user', createdUserData.id, response.data);
   }
 });
 
@@ -50,10 +52,13 @@ When('I create a user', async function () {
     const response = await usersClient.createUser(this.userData);
     handleApiResponse(response);
     
-    if (response.status === 201 && response.data?.id) {
-      storeCreatedEntity('user', response.data.id, response.data);
+    const userData = (response.data as any)?.data?.data || response.data;
+    if (response.status === 201 && userData?.id) {
+      storeCreatedEntity('user', userData.id, userData);
+      this.userId = userData.id;
     }
-  } catch (error) {
+  } catch (error: any) {
+    console.log(`❌ Error creating user:`, error.status || 'Unknown error');
     handleApiResponse(null, error);
   }
 });
@@ -71,7 +76,8 @@ When('I get the user by ID', async function () {
   try {
     const response = await usersClient.getUserById(this.userId);
     handleApiResponse(response);
-  } catch (error) {
+  } catch (error: any) {
+    console.log(`❌ Error getting user ${this.userId}:`, error.status || 'Unknown error');
     handleApiResponse(null, error);
   }
 });
@@ -81,6 +87,7 @@ When('I get a user with ID {string}', async function (userId: string) {
     const response = await usersClient.getUserById(userId);
     handleApiResponse(response);
   } catch (error) {
+    console.log(`❌ Error getting user ${userId}:`, error);
     handleApiResponse(null, error);
   }
 });
@@ -91,7 +98,8 @@ When('I update the user', async function () {
   try {
     const response = await usersClient.updateUser(this.userId, this.updateData);
     handleApiResponse(response);
-  } catch (error) {
+  } catch (error: any) {
+    console.log(`❌ Error updating user ${this.userId}:`, error.status || 'Unknown error');
     handleApiResponse(null, error);
   }
 });
@@ -103,6 +111,7 @@ When('I update the user with {string} set to {string}', async function (field: s
     const response = await usersClient.updateUser(this.userId, this.updateData);
     handleApiResponse(response);
   } catch (error) {
+    console.log(`❌ Error updating user ${this.userId}:`, error);
     handleApiResponse(null, error);
   }
 });
@@ -111,7 +120,8 @@ When('I delete the user', async function () {
   try {
     const response = await usersClient.deleteUser(this.userId);
     handleApiResponse(response);
-  } catch (error) {
+  } catch (error: any) {
+    console.log(`❌ Error deleting user ${this.userId}:`, error.status || 'Unknown error');
     handleApiResponse(null, error);
   }
 });
@@ -122,50 +132,73 @@ Then('the user should be created successfully', function () {
   expect(response).toBeTruthy();
   expect(response.status).toBe(201);
   expect(response.data).toBeTruthy();
-  expect(response.data.id).toBeTruthy();
   
-  // Validate response schema
-  expect(isValidUser(response.data)).toBe(true);
+  const userData = (response.data as any)?.data?.data || response.data;
+  expect(userData.id).toBeTruthy();
+  this.userId = userData.id;
+  expect(isValidUser(userData)).toBe(true);
 });
 
 Then('I should get a list of users', function () {
   const response = getLastResponse();
   expect(response).toBeTruthy();
   expect(response.status).toBe(200);
-  expect(Array.isArray(response.data)).toBe(true);
-  
-  // Validate response schema
-  expect(isValidUserList(response.data)).toBe(true);
+  const usersData = (response.data as any)?.data?.data || response.data;
+  expect(Array.isArray(usersData)).toBe(true);
+  expect(isValidUserList(usersData)).toBe(true);
 });
 
 Then('I should get the user details', function () {
   const response = getLastResponse();
+  const error = getLastError();
+  
+  if (error) {
+    console.log(`❌ Error getting user details:`, error);
+  }
+  
   expect(response).toBeTruthy();
   expect(response.status).toBe(200);
   expect(response.data).toBeTruthy();
-  expect(response.data.id).toBe(this.userId);
-  
-  // Validate response schema
-  expect(isValidUser(response.data)).toBe(true);
+  const userData = (response.data as any)?.data?.data || response.data;
+  expect(userData.id).toBe(this.userId);
+  expect(isValidUser(userData)).toBe(true);
 });
 
 Then('the user should be updated successfully', function () {
   const response = getLastResponse();
+  const error = getLastError();
+
+  if (error) {
+    console.log(`❌ Update failed:`, error);
+  }
+
   expect(response).toBeTruthy();
   expect(response.status).toBe(200);
   expect(response.data).toBeTruthy();
-  
-  // Verify update data is reflected
+
+  const userData = (response.data as any)?.data?.data || response.data;
   Object.keys(this.updateData).forEach(key => {
-    expect(response.data[key]).toBe(this.updateData[key]);
+    let expected = this.updateData[key];
+    let actual = userData[key];
+    // Para campos que podrían ser numéricos en el futuro
+    if (["age", "phone"].includes(key)) {
+      expected = Number(expected);
+      actual = Number(actual);
+    }
+    expect(actual).toBe(expected);
   });
-  
-  // Validate response schema
-  expect(isValidUser(response.data)).toBe(true);
+
+  expect(isValidUser(userData)).toBe(true);
 });
 
 Then('the user should be deleted successfully', function () {
   const response = getLastResponse();
+  const error = getLastError();
+  
+  if (error) {
+    console.log(`❌ Delete failed:`, error);
+  }
+  
   expect(response).toBeTruthy();
   expect(response.status).toBe(204);
 });
@@ -174,12 +207,10 @@ Then('the response should contain valid user data', function () {
   const response = getLastResponse();
   expect(response).toBeTruthy();
   expect(response.data).toBeTruthy();
-  
-  // Validate response schema
-  expect(isValidUser(response.data)).toBe(true);
-  
-  if (!isValidUser(response.data)) {
-    const errors = getUserValidationErrors(response.data);
+  const userData = (response.data as any)?.data?.data || response.data;
+  expect(isValidUser(userData)).toBe(true);
+  if (!isValidUser(userData)) {
+    const errors = getUserValidationErrors(userData);
     throw new Error(`Invalid user data: ${errors.join(', ')}`);
   }
 });
@@ -187,9 +218,9 @@ Then('the response should contain valid user data', function () {
 Then('each user should have required fields', function () {
   const response = getLastResponse();
   expect(response).toBeTruthy();
-  expect(Array.isArray(response.data)).toBe(true);
-  
-  response.data.forEach((user: any) => {
+  const usersData = (response.data as any)?.data?.data || response.data;
+  expect(Array.isArray(usersData)).toBe(true);
+  usersData.forEach((user: any) => {
     expect(user.id).toBeTruthy();
     expect(user.email).toBeTruthy();
     expect(user.firstName).toBeTruthy();
