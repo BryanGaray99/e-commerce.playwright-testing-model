@@ -17,6 +17,12 @@
 - Validaciones de schema en todos los steps
 - Fallbacks para casos edge
 
+### 4. **Actualización de campos vía PATCH/PUT y DTOs**
+- Solo se pueden actualizar campos que estén definidos en el DTO de actualización correspondiente.
+- Si un campo solo existe en la interfaz y no en el DTO, no será aceptado por el backend.
+- Para que un campo sea actualizable, debe agregarse explícitamente al DTO de update.
+- Ejemplo: Si quieres actualizar `isActive` en usuario, debe estar en `UpdateUserDto`.
+
 ---
 
 ## 📝 Estructura de Archivos

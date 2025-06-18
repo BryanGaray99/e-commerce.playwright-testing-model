@@ -1,9 +1,10 @@
-import { Before, After, BeforeAll, AfterAll, setDefaultTimeout, Given } from '@cucumber/cucumber';
+import { Before, After, BeforeAll, AfterAll, setDefaultTimeout, Given, Then } from '@cucumber/cucumber';
 import { ProductsClient } from '../api/ecommerce_api/ProductsClient';
 import { UsersClient } from '../api/ecommerce_api/UsersClient';
 import { OrdersClient } from '../api/ecommerce_api/OrdersClient';
 import { CategoriesClient } from '../api/ecommerce_api/CategoriesClient';
 import { CartClient } from '../api/ecommerce_api/CartClient';
+import { expect } from '@playwright/test';
 
 // Set default timeout for all steps
 setDefaultTimeout(30000);
@@ -239,5 +240,21 @@ Given('the API is available', async function() {
     console.log('✅ API is available and ready for testing');
   } catch (error: any) {
     throw new Error(`API is not available: ${error.message}`);
+  }
+});
+
+/**
+ * Centralized step definition for validation errors
+ */
+Then('I should receive a validation error', function () {
+  const error = getLastError();
+  const response = getLastResponse();
+  
+  if (error) {
+    expect(error.status || error.response?.status).toBe(422);
+  } else if (response && response.status >= 400) {
+    expect(response.status).toBe(422);
+  } else {
+    throw new Error('Expected validation error but none was found');
   }
 });

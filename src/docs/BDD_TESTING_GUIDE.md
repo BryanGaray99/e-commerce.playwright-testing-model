@@ -111,6 +111,13 @@ console.log('🔍 Response data:', JSON.stringify(response.data, null, 2));
 console.log('🔍 Creating product:', JSON.stringify(productData, null, 2));
 ```
 
+### 4. **Solo se pueden actualizar campos definidos en el DTO**
+- Cuando se realiza un PATCH/PUT, **solo los campos definidos en el DTO correspondiente pueden ser actualizados**.
+- Si intentas enviar un campo extra (no definido en el DTO), el ValidationPipe de NestJS lo rechazará (por ejemplo, con `forbidNonWhitelisted: true`).
+- Para que un campo sea actualizable, debe estar explícitamente en el DTO de update (ej: `UpdateUserDto`, `UpdateProductDto`, etc.).
+- Las interfaces (`User`, `Product`, etc.) solo definen la forma del objeto en memoria, pero **no controlan la validación de entrada**.
+- Ejemplo: Si quieres permitir actualizar `isActive` en usuario, agrégalo al `UpdateUserDto`.
+
 ---
 
 ## 🔧 Patrones de Código
@@ -239,6 +246,13 @@ export function handleApiResponse(response: any, error?: any) {
 - Usar JSON Schema para validar respuestas
 - Validar tanto estructura como tipos de datos
 - Proporcionar errores descriptivos en validaciones
+
+### 5. **Solo se pueden actualizar campos definidos en el DTO**
+- Cuando se realiza un PATCH/PUT, **solo los campos definidos en el DTO correspondiente pueden ser actualizados**.
+- Si intentas enviar un campo extra (no definido en el DTO), el ValidationPipe de NestJS lo rechazará (por ejemplo, con `forbidNonWhitelisted: true`).
+- Para que un campo sea actualizable, debe estar explícitamente en el DTO de update (ej: `UpdateUserDto`, `UpdateProductDto`, etc.).
+- Las interfaces (`User`, `Product`, etc.) solo definen la forma del objeto en memoria, pero **no controlan la validación de entrada**.
+- Ejemplo: Si quieres permitir actualizar `isActive` en usuario, agrégalo al `UpdateUserDto`.
 
 ---
 

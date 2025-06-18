@@ -20,7 +20,7 @@ Feature: Users API
     Given I have invalid user data with missing "<field>"
     When I create a user
     Then I should receive a validation error
-    And I should receive a 400 status code
+    And I should receive a 422 status code
 
     Examples:
       | field     |
@@ -34,7 +34,7 @@ Feature: Users API
     Given I have user data with invalid email format
     When I create a user
     Then I should receive a validation error
-    And I should receive a 400 status code
+    And I should receive a 422 status code
 
   @read @smoke
   Scenario: Get all users

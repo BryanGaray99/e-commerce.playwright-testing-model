@@ -58,7 +58,6 @@ When('I create a user', async function () {
       this.userId = userData.id;
     }
   } catch (error: any) {
-    console.log(`❌ Error creating user:`, error.status || 'Unknown error');
     handleApiResponse(null, error);
   }
 });
@@ -94,12 +93,10 @@ When('I get a user with ID {string}', async function (userId: string) {
 
 When('I update the user', async function () {
   this.updateData = UserFixture.updateUserDto();
-  
   try {
     const response = await usersClient.updateUser(this.userId, this.updateData);
     handleApiResponse(response);
   } catch (error: any) {
-    console.log(`❌ Error updating user ${this.userId}:`, error.status || 'Unknown error');
     handleApiResponse(null, error);
   }
 });
@@ -177,15 +174,23 @@ Then('the user should be updated successfully', function () {
   expect(response.data).toBeTruthy();
 
   const userData = (response.data as any)?.data?.data || response.data;
+
   Object.keys(this.updateData).forEach(key => {
     let expected = this.updateData[key];
     let actual = userData[key];
+    
     // Para campos que podrían ser numéricos en el futuro
     if (["age", "phone"].includes(key)) {
       expected = Number(expected);
       actual = Number(actual);
     }
-    expect(actual).toBe(expected);
+    
+    // Comparar address con toStrictEqual para objetos complejos
+    if (key === 'address') {
+      expect(actual).toStrictEqual(expected);
+    } else {
+      expect(actual).toBe(expected);
+    }
   });
 
   expect(isValidUser(userData)).toBe(true);

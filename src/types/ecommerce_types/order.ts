@@ -9,6 +9,7 @@ export interface OrderItem {
   productName: string;
   quantity: number;
   price: number;
+  subtotal: number;
 }
 
 export interface Order extends BaseEntity {

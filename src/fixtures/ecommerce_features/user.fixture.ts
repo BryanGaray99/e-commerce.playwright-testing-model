@@ -58,14 +58,23 @@ export class UserFixture {
   static updateUserDto(overrides: Partial<UpdateUserDto> = {}): UpdateUserDto {
     const updates: UpdateUserDto = {};
     
-    // Randomly include some fields
+    // Solo incluir campos básicos por defecto, no address
     if (faker.datatype.boolean()) updates.email = faker.internet.email();
     if (faker.datatype.boolean()) updates.firstName = faker.person.firstName();
     if (faker.datatype.boolean()) updates.lastName = faker.person.lastName();
     if (faker.datatype.boolean()) updates.phone = faker.phone.number();
-    if (faker.datatype.boolean()) updates.address = this.createAddress();
     if (faker.datatype.boolean()) updates.isActive = faker.datatype.boolean();
-
+    
+    // Solo incluir address si se especifica explícitamente
+    if (overrides.address) {
+      updates.address = this.createAddress();
+    }
+    
+    // Asegurar que al menos un campo esté presente si no hay overrides
+    if (Object.keys(updates).length === 0 && Object.keys(overrides).length === 0) {
+      updates.firstName = faker.person.firstName();
+    }
+    
     return { ...updates, ...overrides };
   }
 
@@ -127,7 +136,11 @@ export class UserFixture {
       withInvalidEmail: this.createUserDto({ email: 'invalid-email' }),
       withoutFirstName: this.createUserDto({ firstName: undefined as any }),
       withoutLastName: this.createUserDto({ lastName: undefined as any }),
-      withoutAddress: this.createUserDto({ address: undefined as any }),
+      withoutAddress: (() => {
+        const dto = this.createUserDto() as any;
+        delete dto.address;
+        return dto;
+      })(),
       withEmptyFirstName: this.createUserDto({ firstName: '' }),
       withEmptyLastName: this.createUserDto({ lastName: '' })
     };

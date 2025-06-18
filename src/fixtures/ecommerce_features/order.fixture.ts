@@ -13,12 +13,14 @@ export class OrderFixture {
   static createOrderItem(overrides: Partial<OrderItem> = {}): OrderItem {
     const quantity = faker.number.int({ min: 1, max: 5 });
     const price = parseFloat(faker.commerce.price({ min: 10, max: 500 }));
+    const subtotal = quantity * price;
     
     return {
       productId: faker.string.uuid(),
       productName: faker.commerce.productName(),
       quantity,
       price,
+      subtotal,
       ...overrides
     };
   }
@@ -84,14 +86,38 @@ export class OrderFixture {
    * Generate order creation data
    */
   static createOrderDto(overrides: Partial<CreateOrderDto> = {}): CreateOrderDto {
-    const items = this.createOrderItemDtos();
+    // Usar userId del override si existe, si no lanzar error
+    const userId = Object.prototype.hasOwnProperty.call(overrides, 'userId') ? overrides.userId : undefined;
+    if (!userId && overrides.userId !== undefined) {
+      throw new Error('userId es obligatorio en createOrderDto');
+    }
     
-    return {
-      userId: faker.string.uuid(),
+    const items = Object.prototype.hasOwnProperty.call(overrides, 'items')
+      ? overrides.items
+      : [this.createOrderItemDto()];
+    
+    const shippingAddress = Object.prototype.hasOwnProperty.call(overrides, 'shippingAddress')
+      ? overrides.shippingAddress
+      : UserFixture.createAddress();
+    
+    const result: any = {
+      ...overrides,
+      userId,
       items,
-      shippingAddress: UserFixture.createAddress(),
-      ...overrides
+      shippingAddress,
     };
+    
+    // Solo eliminar userId si es undefined Y el override lo puso explícitamente (caso negativo)
+    if (typeof userId === 'undefined' && Object.prototype.hasOwnProperty.call(overrides, 'userId')) {
+      delete result.userId;
+    }
+    
+    // Eliminar shippingAddress si es undefined
+    if (typeof shippingAddress === 'undefined') {
+      delete result.shippingAddress;
+    }
+    
+    return result as CreateOrderDto;
   }
 
   /**

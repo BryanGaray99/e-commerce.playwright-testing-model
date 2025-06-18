@@ -13,14 +13,21 @@ import { OrderStatus } from '../../types/common';
 // Given steps
 Given('a test user exists for orders', async function () {
   const userData = UserFixture.createUserDto();
+  
   const response = await usersClient.createUser(userData);
   expect(response.status).toBe(201);
   
-  this.testUserId = response.data.id;
+  // Acceder a la estructura anidada de la respuesta
+  const userDataResponse = (response.data as any)?.data?.data || response.data;
+  this.testUserId = userDataResponse.id;
+  
   storeCreatedEntity('user', this.testUserId, response.data);
 });
 
 Given('I have valid order data', function () {
+  if (!this.testUserId) {
+    throw new Error('testUserId no está definido. El step "a test user exists for orders" debe ejecutarse antes.');
+  }
   this.orderData = OrderFixture.createOrderDto({ userId: this.testUserId });
 });
 
@@ -30,42 +37,39 @@ Given('I have invalid order data with missing {string}', function (field: string
 });
 
 Given('I have order data with empty items array', function () {
-  this.orderData = OrderFixture.createInvalidOrder().withoutItems;
-  this.orderData.userId = this.testUserId;
+  this.orderData = OrderFixture.createOrderDto({ userId: this.testUserId, items: [] });
 });
 
 Given('an order exists in the system', async function () {
   this.existingOrder = OrderFixture.createOrderDto({ userId: this.testUserId });
   const response = await ordersClient.createOrder(this.existingOrder);
   expect(response.status).toBe(201);
-  
-  this.orderId = response.data.id;
+  const orderData = (response.data as any)?.data?.data || response.data;
+  this.orderId = orderData.id;
   storeCreatedEntity('order', this.orderId, response.data);
 });
 
 Given('multiple orders exist in the system', async function () {
   this.createdOrders = [];
-  
   for (let i = 0; i < 3; i++) {
     const orderData = OrderFixture.createOrderDto({ userId: this.testUserId });
     const response = await ordersClient.createOrder(orderData);
     expect(response.status).toBe(201);
-    
-    this.createdOrders.push(response.data);
-    storeCreatedEntity('order', response.data.id, response.data);
+    const createdOrderData = (response.data as any)?.data?.data || response.data;
+    this.createdOrders.push(createdOrderData);
+    storeCreatedEntity('order', createdOrderData.id, response.data);
   }
 });
 
 Given('orders exist for a specific user', async function () {
   this.userOrders = [];
-  
   for (let i = 0; i < 2; i++) {
     const orderData = OrderFixture.createOrderDto({ userId: this.testUserId });
     const response = await ordersClient.createOrder(orderData);
     expect(response.status).toBe(201);
-    
-    this.userOrders.push(response.data);
-    storeCreatedEntity('order', response.data.id, response.data);
+    const createdOrderData = (response.data as any)?.data?.data || response.data;
+    this.userOrders.push(createdOrderData);
+    storeCreatedEntity('order', createdOrderData.id, response.data);
   }
 });
 
@@ -74,9 +78,10 @@ When('I create an order', async function () {
   try {
     const response = await ordersClient.createOrder(this.orderData);
     handleApiResponse(response);
-    
-    if (response.status === 201 && response.data?.id) {
-      storeCreatedEntity('order', response.data.id, response.data);
+    const orderData = (response.data as any)?.data?.data || response.data;
+    if (response.status === 201 && orderData?.id) {
+      storeCreatedEntity('order', orderData.id, orderData);
+      this.orderId = orderData.id;
     }
   } catch (error) {
     handleApiResponse(null, error);
@@ -151,35 +156,39 @@ Then('the order should be created successfully', function () {
   expect(response).toBeTruthy();
   expect(response.status).toBe(201);
   expect(response.data).toBeTruthy();
-  expect(response.data.id).toBeTruthy();
+  const orderData = (response.data as any)?.data?.data || response.data;
+  expect(orderData.id).toBeTruthy();
+  this.orderId = orderData.id;
   
   // Validate response schema
-  expect(isValidOrder(response.data)).toBe(true);
+  expect(isValidOrder(orderData)).toBe(true);
 });
 
 Then('I should get a list of orders', function () {
   const response = getLastResponse();
   expect(response).toBeTruthy();
   expect(response.status).toBe(200);
-  expect(Array.isArray(response.data)).toBe(true);
+  const ordersData = (response.data as any)?.data?.data || response.data;
+  expect(Array.isArray(ordersData)).toBe(true);
   
   // Validate response schema
-  expect(isValidOrderList(response.data)).toBe(true);
+  expect(isValidOrderList(ordersData)).toBe(true);
 });
 
 Then('I should get orders filtered by user', function () {
   const response = getLastResponse();
   expect(response).toBeTruthy();
   expect(response.status).toBe(200);
-  expect(Array.isArray(response.data)).toBe(true);
+  const ordersData = (response.data as any)?.data?.data || response.data;
+  expect(Array.isArray(ordersData)).toBe(true);
   
   // All orders should belong to the test user
-  response.data.forEach((order: any) => {
+  ordersData.forEach((order: any) => {
     expect(order.userId).toBe(this.testUserId);
   });
   
   // Validate response schema
-  expect(isValidOrderList(response.data)).toBe(true);
+  expect(isValidOrderList(ordersData)).toBe(true);
 });
 
 Then('I should get the order details', function () {
@@ -187,10 +196,11 @@ Then('I should get the order details', function () {
   expect(response).toBeTruthy();
   expect(response.status).toBe(200);
   expect(response.data).toBeTruthy();
-  expect(response.data.id).toBe(this.orderId);
+  const orderData = (response.data as any)?.data?.data || response.data;
+  expect(orderData.id).toBe(this.orderId);
   
   // Validate response schema
-  expect(isValidOrder(response.data)).toBe(true);
+  expect(isValidOrder(orderData)).toBe(true);
 });
 
 Then('the order should be updated successfully', function () {
@@ -198,15 +208,17 @@ Then('the order should be updated successfully', function () {
   expect(response).toBeTruthy();
   expect(response.status).toBe(200);
   expect(response.data).toBeTruthy();
+  const orderData = (response.data as any)?.data?.data || response.data;
   
   // Validate response schema
-  expect(isValidOrder(response.data)).toBe(true);
+  expect(isValidOrder(orderData)).toBe(true);
 });
 
 Then('the order status should be {string}', function (expectedStatus: string) {
   const response = getLastResponse();
   expect(response).toBeTruthy();
-  expect(response.data.status).toBe(expectedStatus);
+  const orderData = (response.data as any)?.data?.data || response.data;
+  expect(orderData.status).toBe(expectedStatus);
 });
 
 Then('the order should be cancelled successfully', function () {
@@ -219,12 +231,13 @@ Then('the response should contain valid order data', function () {
   const response = getLastResponse();
   expect(response).toBeTruthy();
   expect(response.data).toBeTruthy();
+  const orderData = (response.data as any)?.data?.data || response.data;
   
   // Validate response schema
-  expect(isValidOrder(response.data)).toBe(true);
+  expect(isValidOrder(orderData)).toBe(true);
   
-  if (!isValidOrder(response.data)) {
-    const errors = getOrderValidationErrors(response.data);
+  if (!isValidOrder(orderData)) {
+    const errors = getOrderValidationErrors(orderData);
     throw new Error(`Invalid order data: ${errors.join(', ')}`);
   }
 });
@@ -232,9 +245,10 @@ Then('the response should contain valid order data', function () {
 Then('each order should have required fields', function () {
   const response = getLastResponse();
   expect(response).toBeTruthy();
-  expect(Array.isArray(response.data)).toBe(true);
+  const ordersData = (response.data as any)?.data?.data || response.data;
+  expect(Array.isArray(ordersData)).toBe(true);
   
-  response.data.forEach((order: any) => {
+  ordersData.forEach((order: any) => {
     expect(order.id).toBeTruthy();
     expect(order.userId).toBeTruthy();
     expect(Array.isArray(order.items)).toBe(true);

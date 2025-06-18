@@ -208,6 +208,29 @@ export class ProductFixture {
 }
 ```
 
+### 8. **Error: PATCH/PUT con campos no definidos en el DTO**
+
+#### Problema: El backend rechaza el campo con 422 o error de validación
+```typescript
+// ❌ Error
+PATCH /users/:id { isActive: false }
+// Respuesta: 422 Unprocessable Entity
+```
+**Causa**: El campo `isActive` no está definido en el DTO de actualización (`UpdateUserDto`).
+
+**Solución**:
+- Solo enviar campos que estén definidos en el DTO.
+- Si se requiere actualizar ese campo, agregarlo explícitamente al DTO de update.
+```typescript
+// ✅ Solución
+export class UpdateUserDto {
+  // ...otros campos...
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+}
+```
+
 ## 🔍 Estrategia de Debugging
 
 ### 1. **Identificar el Problema**

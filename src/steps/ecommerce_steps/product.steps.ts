@@ -102,7 +102,6 @@ When('I get the product by ID', async function () {
     const response = await productsClient.getProductById(this.productId);
     handleApiResponse(response);
   } catch (error: any) {
-    console.log(`❌ Error getting product ${this.productId}:`, error.status || 'Unknown error');
     handleApiResponse(null, error);
   }
 });
@@ -112,7 +111,6 @@ When('I get a product with ID {string}', async function (productId: string) {
     const response = await productsClient.getProductById(productId);
     handleApiResponse(response);
   } catch (error) {
-    console.log(`❌ Error getting product ${productId}:`, error);
     handleApiResponse(null, error);
   }
 });
@@ -124,7 +122,6 @@ When('I update the product', async function () {
     const response = await productsClient.updateProduct(this.productId, this.updateData);
     handleApiResponse(response);
   } catch (error: any) {
-    console.log(`❌ Error updating product ${this.productId}:`, error.status || 'Unknown error');
     handleApiResponse(null, error);
   }
 });
@@ -136,7 +133,6 @@ When('I update the product with {string} set to {string}', async function (field
     const response = await productsClient.updateProduct(this.productId, this.updateData);
     handleApiResponse(response);
   } catch (error) {
-    console.log(`❌ Error updating product ${this.productId}:`, error);
     handleApiResponse(null, error);
   }
 });
@@ -146,7 +142,6 @@ When('I delete the product', async function () {
     const response = await productsClient.deleteProduct(this.productId);
     handleApiResponse(response);
   } catch (error: any) {
-    console.log(`❌ Error deleting product ${this.productId}:`, error.status || 'Unknown error');
     handleApiResponse(null, error);
   }
 });
@@ -249,19 +244,6 @@ Then('I should receive a {int} status code', function (statusCode: number) {
     expect(response.status).toBe(statusCode);
   } else {
     throw new Error(`Expected status code ${statusCode} but no response or error was found`);
-  }
-});
-
-Then('I should receive a validation error', function () {
-  const error = getLastError();
-  const response = getLastResponse();
-  
-  if (error) {
-    expect(error.status || error.response?.status).toBe(422);
-  } else if (response && response.status >= 400) {
-    expect(response.status).toBe(422);
-  } else {
-    throw new Error('Expected validation error but none was found');
   }
 });
 

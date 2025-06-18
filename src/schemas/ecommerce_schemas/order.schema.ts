@@ -31,9 +31,10 @@ const orderItemSchema: JSONSchemaType<OrderItem> = {
     productId: { type: 'string' },
     productName: { type: 'string' },
     quantity: { type: 'number', minimum: 1 },
-    price: { type: 'number', minimum: 0 }
+    price: { type: 'number', minimum: 0 },
+    subtotal: { type: 'number', minimum: 0 }
   },
-  required: ['productId', 'productName', 'quantity', 'price'],
+  required: ['productId', 'productName', 'quantity', 'price', 'subtotal'],
   additionalProperties: false
 };
 
