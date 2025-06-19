@@ -28,7 +28,7 @@ Feature: Cart API
     Given I have invalid cart item data with missing "<field>"
     When I add the item to cart
     Then I should receive a validation error
-    And I should receive a 400 status code
+    And I should receive a 422 status code
 
     Examples:
       | field       |
@@ -42,7 +42,7 @@ Feature: Cart API
     Given I have cart item data with invalid "<field>"
     When I add the item to cart
     Then I should receive a validation error
-    And I should receive a 400 status code
+    And I should receive a 422 status code
 
     Examples:
       | field    |
@@ -62,7 +62,7 @@ Feature: Cart API
     Given an item exists in the cart
     When I update the item quantity to 0
     Then I should receive a validation error
-    And I should receive a 400 status code
+    And I should receive a 422 status code
 
   @delete @smoke
   Scenario: Remove item from cart

@@ -258,3 +258,28 @@ Then('I should receive a validation error', function () {
     throw new Error('Expected validation error but none was found');
   }
 });
+
+/**
+ * Centralized step definition for status codes
+ */
+Then('I should receive a {int} status code', function (statusCode: number) {
+  const response = getLastResponse();
+  const error = getLastError();
+  
+  if (error) {
+    expect(error.status || error.response?.status).toBe(statusCode);
+  } else if (response) {
+    expect(response.status).toBe(statusCode);
+  } else {
+    throw new Error(`Expected status code ${statusCode} but no response or error was found`);
+  }
+});
+
+/**
+ * Centralized step definition for not found errors
+ */
+Then('I should receive a not found error', function () {
+  const error = getLastError();
+  expect(error).toBeTruthy();
+  expect(error.status || error.response?.status).toBe(404);
+});

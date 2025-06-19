@@ -7,6 +7,7 @@
 4. [Depuración de Errores](#depuración-de-errores)
 5. [Aprendizajes Clave](#aprendizajes-clave)
 6. [Troubleshooting](#troubleshooting)
+7. [Lecciones Aprendidas](#lecciones-aprendidas)
 
 ---
 
@@ -289,22 +290,113 @@ npm run test:debug
 
 ---
 
-## 🚀 Próximos Pasos
+## 📚 Lecciones Aprendidas
 
-### Mejoras Futuras
-1. **Reportes personalizados** con información de contexto
-2. **Screenshots automáticos** en fallos
-3. **Métricas de performance** de tests
-4. **Integración con CI/CD** pipelines
-5. **Tests de carga** con Playwright
+### 🎯 **Lecciones Clave del Proyecto**
 
-### Mantenimiento
-- Revisar y actualizar guía regularmente
-- Documentar nuevos patrones y aprendizajes
-- Mantener consistencia en todos los archivos de steps
-- Refactorizar código duplicado
+#### 1. **Validación de DTOs en Backend**
+- **Problema**: Los DTOs del backend no tenían todas las validaciones necesarias
+- **Solución**: Agregar `@ArrayMinSize(1)` para arrays que no pueden estar vacíos
+- **Aprendizaje**: La validación debe ser consistente entre frontend y backend
+
+#### 2. **Estructura de Respuesta API**
+- **Problema**: Las APIs devuelven estructura anidada `response.data.data.data`
+- **Solución**: Usar patrón `(response.data as any)?.data?.data || response.data`
+- **Aprendizaje**: Siempre verificar la estructura real de respuesta vs esperada
+
+#### 3. **Steps Duplicados en Cucumber**
+- **Problema**: Definiciones duplicadas causan ambigüedad en Cucumber
+- **Solución**: Centralizar steps comunes en `hooks.ts`
+- **Aprendizaje**: Un solo lugar para definiciones de steps compartidos
+
+#### 4. **Manejo de Campos en DTOs de Actualización**
+- **Problema**: Campos no definidos en DTOs causan errores 422
+- **Solución**: Solo enviar campos definidos en el DTO correspondiente
+- **Aprendizaje**: Los DTOs controlan qué campos son actualizables
+
+#### 5. **Logs Estratégicos**
+- **Problema**: Logs excesivos dificultando la lectura de errores
+- **Solución**: Solo logs de error con contexto esencial
+- **Aprendizaje**: Logs solo cuando es necesario para debugging
+
+#### 6. **Validación de Schemas**
+- **Problema**: Datos no coinciden con schemas esperados
+- **Solución**: Implementar validación JSON Schema en todos los steps
+- **Aprendizaje**: Validar tanto estructura como tipos de datos
+
+#### 7. **Fixtures y Datos de Prueba**
+- **Problema**: Fixtures generan datos inválidos
+- **Solución**: Asegurar tipos correctos (Number vs String)
+- **Aprendizaje**: Los fixtures deben generar datos válidos para el backend
+
+#### 8. **Manejo de Errores HTTP**
+- **Problema**: Respuestas 4xx no se trataban como errores
+- **Solución**: Modificar `handleApiResponse` para detectar status codes de error
+- **Aprendizaje**: Tratar respuestas 4xx/5xx como errores, no como respuestas exitosas
+
+#### 9. **Comparación de Tipos**
+- **Problema**: Comparación de string vs number en validaciones
+- **Solución**: Convertir ambos valores a Number() antes de comparar
+- **Aprendizaje**: Los feature files pasan strings, las APIs devuelven números
+
+#### 10. **Cleanup de Datos**
+- **Problema**: Datos de prueba no se limpian correctamente
+- **Solución**: Implementar cleanup robusto en hooks After
+- **Aprendizaje**: Limpiar datos en orden inverso a las dependencias
+
+### 🔧 **Patrones Implementados**
+
+#### Patrón de Acceso a Datos
+```typescript
+// ✅ Patrón estándar
+const data = (response.data as any)?.data?.data || response.data;
+```
+
+#### Patrón de Manejo de Errores
+```typescript
+// ✅ Patrón estándar
+try {
+  const response = await client.method(data);
+  handleApiResponse(response);
+} catch (error) {
+  handleApiResponse(null, error);
+}
+```
+
+#### Patrón de Validación
+```typescript
+// ✅ Patrón estándar
+expect(isValidResource(data)).toBe(true);
+if (!isValidResource(data)) {
+  const errors = getResourceValidationErrors(data);
+  throw new Error(`Invalid data: ${errors.join(', ')}`);
+}
+```
+
+### 📊 **Métricas de Éxito**
+
+#### Antes de las Correcciones
+- ❌ Tests fallando por ambigüedad de steps
+- ❌ Errores de validación no detectados
+- ❌ Logs excesivos dificultando debugging
+- ❌ Datos de prueba inconsistentes
+
+#### Después de las Correcciones
+- ✅ 17 scenarios (17 passed) - 100% éxito
+- ✅ 115 steps (115 passed) - Sin errores
+- ✅ Logs limpios y estratégicos
+- ✅ Validaciones robustas implementadas
+- ✅ Patrones de código consistentes
+
+### 🎯 **Próximos Pasos Recomendados**
+
+1. **Aplicar patrones a otros recursos** (cart, category, etc.)
+2. **Implementar métricas de performance** de tests
+3. **Agregar reportes personalizados** con contexto
+4. **Integrar con CI/CD** pipelines
+5. **Documentar nuevos aprendizajes** continuamente
 
 ---
 
 *Última actualización: Junio 2025*
-*Versión: 1.0* 
+*Versión: 1.1* 

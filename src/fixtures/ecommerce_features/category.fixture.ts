@@ -60,15 +60,15 @@ export class CategoryFixture {
   /**
    * Generate root category (no parent)
    */
-  static createRootCategory(overrides: Partial<Category> = {}): Category {
-    return this.createCategory({ parentId: undefined, ...overrides });
+  static createRootCategory(overrides: Partial<CreateCategoryDto> = {}): CreateCategoryDto {
+    return this.createCategoryDto({ parentId: undefined, ...overrides });
   }
 
   /**
    * Generate child category
    */
-  static createChildCategory(parentId: string, overrides: Partial<Category> = {}): Category {
-    return this.createCategory({ parentId, ...overrides });
+  static createChildCategory(parentId: string, overrides: Partial<CreateCategoryDto> = {}): CreateCategoryDto {
+    return this.createCategoryDto({ parentId, ...overrides });
   }
 
   /**
@@ -84,7 +84,7 @@ export class CategoryFixture {
   static createCategoryWithChildren(childCount: number = 3, overrides: Partial<Category> = {}): Category {
     const parent = this.createCategory(overrides);
     const children = Array.from({ length: childCount }, () => 
-      this.createChildCategory(parent.id)
+      this.createCategory({ parentId: parent.id })
     );
     
     return { ...parent, children };
@@ -94,32 +94,35 @@ export class CategoryFixture {
    * Generate category hierarchy
    */
   static createCategoryHierarchy() {
-    const electronics = this.createRootCategory({
+    const electronicsId = faker.string.uuid();
+    const clothingId = faker.string.uuid();
+
+    const electronics = this.createCategoryDto({
       name: 'Electronics',
       description: 'Electronic devices and accessories'
     });
 
-    const smartphones = this.createChildCategory(electronics.id, {
+    const smartphones = this.createChildCategory(electronicsId, {
       name: 'Smartphones',
       description: 'Mobile phones and accessories'
     });
 
-    const laptops = this.createChildCategory(electronics.id, {
+    const laptops = this.createChildCategory(electronicsId, {
       name: 'Laptops',
       description: 'Portable computers and accessories'
     });
 
-    const clothing = this.createRootCategory({
+    const clothing = this.createCategoryDto({
       name: 'Clothing',
       description: 'Apparel and fashion items'
     });
 
-    const mensClothing = this.createChildCategory(clothing.id, {
+    const mensClothing = this.createChildCategory(clothingId, {
       name: "Men's Clothing",
       description: 'Clothing items for men'
     });
 
-    const womensClothing = this.createChildCategory(clothing.id, {
+    const womensClothing = this.createChildCategory(clothingId, {
       name: "Women's Clothing",
       description: 'Clothing items for women'
     });

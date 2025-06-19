@@ -9,7 +9,7 @@ export interface CartItem {
   productName: string;
   price: number;
   quantity: number;
-  total: number;
+  subtotal: number;
 }
 
 export interface Cart extends BaseEntity {

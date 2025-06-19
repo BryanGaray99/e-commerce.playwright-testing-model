@@ -12,7 +12,7 @@ const categoryBaseSchema = {
     id: { type: 'string' },
     name: { type: 'string', minLength: 2 },
     description: { type: 'string' },
-    parentId: { type: 'string', nullable: true },
+    parentId: { type: 'string' },
     isActive: { type: 'boolean' },
     createdAt: { type: 'string', format: 'date-time' },
     updatedAt: { type: 'string', format: 'date-time' }
@@ -30,25 +30,24 @@ export const categorySchema = {
     ...categoryBaseSchema.properties,
     children: {
       type: 'array',
-      items: categoryBaseSchema,
-      nullable: true
+      items: categoryBaseSchema
     }
   }
 } as const;
 
-export const createCategorySchema: JSONSchemaType<CreateCategoryDto> = {
+export const createCategorySchema = {
   type: 'object',
   properties: {
     name: { type: 'string', minLength: 2 },
     description: { type: 'string' },
     parentId: { type: 'string', nullable: true },
-    isActive: { type: 'boolean', nullable: true }
+    isActive: { type: 'boolean' }
   },
   required: ['name', 'description'],
   additionalProperties: false
-};
+} as const;
 
-export const updateCategorySchema: JSONSchemaType<UpdateCategoryDto> = {
+export const updateCategorySchema = {
   type: 'object',
   properties: {
     name: { type: 'string', minLength: 2, nullable: true },
@@ -58,7 +57,7 @@ export const updateCategorySchema: JSONSchemaType<UpdateCategoryDto> = {
   },
   required: [],
   additionalProperties: false
-};
+} as const;
 
 export const categoryListSchema = {
   type: 'array',

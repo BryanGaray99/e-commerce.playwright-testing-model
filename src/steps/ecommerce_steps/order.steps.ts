@@ -14,14 +14,19 @@ import { OrderStatus } from '../../types/common';
 Given('a test user exists for orders', async function () {
   const userData = UserFixture.createUserDto();
   
-  const response = await usersClient.createUser(userData);
-  expect(response.status).toBe(201);
-  
-  // Acceder a la estructura anidada de la respuesta
-  const userDataResponse = (response.data as any)?.data?.data || response.data;
-  this.testUserId = userDataResponse.id;
-  
-  storeCreatedEntity('user', this.testUserId, response.data);
+  try {
+    const response = await usersClient.createUser(userData);
+    expect(response.status).toBe(201);
+    
+    // Acceder a la estructura anidada de la respuesta
+    const userDataResponse = (response.data as any)?.data?.data || response.data;
+    this.testUserId = userDataResponse.id;
+    
+    storeCreatedEntity('user', this.testUserId, response.data);
+  } catch (error: any) {
+    console.log(`❌ Error creating test user for orders:`, error.status || 'Unknown error');
+    throw error;
+  }
 });
 
 Given('I have valid order data', function () {
@@ -42,34 +47,54 @@ Given('I have order data with empty items array', function () {
 
 Given('an order exists in the system', async function () {
   this.existingOrder = OrderFixture.createOrderDto({ userId: this.testUserId });
-  const response = await ordersClient.createOrder(this.existingOrder);
-  expect(response.status).toBe(201);
-  const orderData = (response.data as any)?.data?.data || response.data;
-  this.orderId = orderData.id;
-  storeCreatedEntity('order', this.orderId, response.data);
+  
+  try {
+    const response = await ordersClient.createOrder(this.existingOrder);
+    expect(response.status).toBe(201);
+    const orderData = (response.data as any)?.data?.data || response.data;
+    this.orderId = orderData.id;
+    storeCreatedEntity('order', this.orderId, response.data);
+  } catch (error: any) {
+    console.log(`❌ Error creating order:`, error.status || 'Unknown error');
+    throw error;
+  }
 });
 
 Given('multiple orders exist in the system', async function () {
   this.createdOrders = [];
+  
   for (let i = 0; i < 3; i++) {
     const orderData = OrderFixture.createOrderDto({ userId: this.testUserId });
-    const response = await ordersClient.createOrder(orderData);
-    expect(response.status).toBe(201);
-    const createdOrderData = (response.data as any)?.data?.data || response.data;
-    this.createdOrders.push(createdOrderData);
-    storeCreatedEntity('order', createdOrderData.id, response.data);
+    
+    try {
+      const response = await ordersClient.createOrder(orderData);
+      expect(response.status).toBe(201);
+      const createdOrderData = (response.data as any)?.data?.data || response.data;
+      this.createdOrders.push(createdOrderData);
+      storeCreatedEntity('order', createdOrderData.id, response.data);
+    } catch (error: any) {
+      console.log(`❌ Error creating order ${i}:`, error.status || 'Unknown error');
+      throw error;
+    }
   }
 });
 
 Given('orders exist for a specific user', async function () {
   this.userOrders = [];
+  
   for (let i = 0; i < 2; i++) {
     const orderData = OrderFixture.createOrderDto({ userId: this.testUserId });
-    const response = await ordersClient.createOrder(orderData);
-    expect(response.status).toBe(201);
-    const createdOrderData = (response.data as any)?.data?.data || response.data;
-    this.userOrders.push(createdOrderData);
-    storeCreatedEntity('order', createdOrderData.id, response.data);
+    
+    try {
+      const response = await ordersClient.createOrder(orderData);
+      expect(response.status).toBe(201);
+      const createdOrderData = (response.data as any)?.data?.data || response.data;
+      this.userOrders.push(createdOrderData);
+      storeCreatedEntity('order', createdOrderData.id, response.data);
+    } catch (error: any) {
+      console.log(`❌ Error creating user order ${i}:`, error.status || 'Unknown error');
+      throw error;
+    }
   }
 });
 
@@ -78,12 +103,16 @@ When('I create an order', async function () {
   try {
     const response = await ordersClient.createOrder(this.orderData);
     handleApiResponse(response);
-    const orderData = (response.data as any)?.data?.data || response.data;
-    if (response.status === 201 && orderData?.id) {
-      storeCreatedEntity('order', orderData.id, orderData);
-      this.orderId = orderData.id;
+    
+    if (response.status === 201 && response.data) {
+      const orderData = (response.data as any)?.data?.data || response.data;
+      if (orderData?.id) {
+        this.orderId = orderData.id;
+        storeCreatedEntity('order', orderData.id, response.data);
+      }
     }
-  } catch (error) {
+  } catch (error: any) {
+    console.log(`❌ Error creating order:`, error.status || 'Unknown error');
     handleApiResponse(null, error);
   }
 });
@@ -92,7 +121,8 @@ When('I get all orders', async function () {
   try {
     const response = await ordersClient.getAllOrders();
     handleApiResponse(response);
-  } catch (error) {
+  } catch (error: any) {
+    console.log(`❌ Error getting all orders:`, error.status || 'Unknown error');
     handleApiResponse(null, error);
   }
 });
@@ -101,7 +131,8 @@ When('I get orders by user ID', async function () {
   try {
     const response = await ordersClient.getOrdersByUser(this.testUserId);
     handleApiResponse(response);
-  } catch (error) {
+  } catch (error: any) {
+    console.log(`❌ Error getting orders by user ID:`, error.status || 'Unknown error');
     handleApiResponse(null, error);
   }
 });
@@ -110,7 +141,8 @@ When('I get the order by ID', async function () {
   try {
     const response = await ordersClient.getOrderById(this.orderId);
     handleApiResponse(response);
-  } catch (error) {
+  } catch (error: any) {
+    console.log(`❌ Error getting order by ID:`, error.status || 'Unknown error');
     handleApiResponse(null, error);
   }
 });
@@ -119,7 +151,8 @@ When('I get an order with ID {string}', async function (orderId: string) {
   try {
     const response = await ordersClient.getOrderById(orderId);
     handleApiResponse(response);
-  } catch (error) {
+  } catch (error: any) {
+    console.log(`❌ Error getting order with ID ${orderId}:`, error.status || 'Unknown error');
     handleApiResponse(null, error);
   }
 });
@@ -136,7 +169,8 @@ When('I update the order status to {string}', async function (status: string) {
   try {
     const response = await ordersClient.updateOrderStatus(this.orderId, status as OrderStatus);
     handleApiResponse(response);
-  } catch (error) {
+  } catch (error: any) {
+    console.log(`❌ Error updating order status:`, error.status || 'Unknown error');
     handleApiResponse(null, error);
   }
 });
@@ -145,7 +179,8 @@ When('I cancel the order', async function () {
   try {
     const response = await ordersClient.cancelOrder(this.orderId);
     handleApiResponse(response);
-  } catch (error) {
+  } catch (error: any) {
+    console.log(`❌ Error cancelling order:`, error.status || 'Unknown error');
     handleApiResponse(null, error);
   }
 });
@@ -153,12 +188,17 @@ When('I cancel the order', async function () {
 // Then steps
 Then('the order should be created successfully', function () {
   const response = getLastResponse();
+  const error = getLastError();
+
+  if (error) {
+    console.log(`❌ Order creation failed:`, error);
+  }
+
   expect(response).toBeTruthy();
   expect(response.status).toBe(201);
   expect(response.data).toBeTruthy();
   const orderData = (response.data as any)?.data?.data || response.data;
   expect(orderData.id).toBeTruthy();
-  this.orderId = orderData.id;
   
   // Validate response schema
   expect(isValidOrder(orderData)).toBe(true);
@@ -166,6 +206,12 @@ Then('the order should be created successfully', function () {
 
 Then('I should get a list of orders', function () {
   const response = getLastResponse();
+  const error = getLastError();
+
+  if (error) {
+    console.log(`❌ Getting orders failed:`, error);
+  }
+
   expect(response).toBeTruthy();
   expect(response.status).toBe(200);
   const ordersData = (response.data as any)?.data?.data || response.data;
@@ -177,6 +223,12 @@ Then('I should get a list of orders', function () {
 
 Then('I should get orders filtered by user', function () {
   const response = getLastResponse();
+  const error = getLastError();
+
+  if (error) {
+    console.log(`❌ Getting orders by user failed:`, error);
+  }
+
   expect(response).toBeTruthy();
   expect(response.status).toBe(200);
   const ordersData = (response.data as any)?.data?.data || response.data;
@@ -193,6 +245,12 @@ Then('I should get orders filtered by user', function () {
 
 Then('I should get the order details', function () {
   const response = getLastResponse();
+  const error = getLastError();
+
+  if (error) {
+    console.log(`❌ Getting order details failed:`, error);
+  }
+
   expect(response).toBeTruthy();
   expect(response.status).toBe(200);
   expect(response.data).toBeTruthy();
@@ -205,6 +263,12 @@ Then('I should get the order details', function () {
 
 Then('the order should be updated successfully', function () {
   const response = getLastResponse();
+  const error = getLastError();
+
+  if (error) {
+    console.log(`❌ Order update failed:`, error);
+  }
+
   expect(response).toBeTruthy();
   expect(response.status).toBe(200);
   expect(response.data).toBeTruthy();
@@ -216,6 +280,12 @@ Then('the order should be updated successfully', function () {
 
 Then('the order status should be {string}', function (expectedStatus: string) {
   const response = getLastResponse();
+  const error = getLastError();
+
+  if (error) {
+    console.log(`❌ Order status validation failed:`, error);
+  }
+
   expect(response).toBeTruthy();
   const orderData = (response.data as any)?.data?.data || response.data;
   expect(orderData.status).toBe(expectedStatus);
@@ -223,12 +293,24 @@ Then('the order status should be {string}', function (expectedStatus: string) {
 
 Then('the order should be cancelled successfully', function () {
   const response = getLastResponse();
+  const error = getLastError();
+
+  if (error) {
+    console.log(`❌ Order cancellation failed:`, error);
+  }
+
   expect(response).toBeTruthy();
   expect(response.status).toBe(204);
 });
 
 Then('the response should contain valid order data', function () {
   const response = getLastResponse();
+  const error = getLastError();
+
+  if (error) {
+    console.log(`❌ Order validation failed:`, error);
+  }
+
   expect(response).toBeTruthy();
   expect(response.data).toBeTruthy();
   const orderData = (response.data as any)?.data?.data || response.data;
@@ -244,6 +326,12 @@ Then('the response should contain valid order data', function () {
 
 Then('each order should have required fields', function () {
   const response = getLastResponse();
+  const error = getLastError();
+
+  if (error) {
+    console.log(`❌ Order fields validation failed:`, error);
+  }
+
   expect(response).toBeTruthy();
   const ordersData = (response.data as any)?.data?.data || response.data;
   expect(Array.isArray(ordersData)).toBe(true);

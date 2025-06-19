@@ -15,9 +15,9 @@ const cartItemSchema: JSONSchemaType<CartItem> = {
     productName: { type: 'string' },
     price: { type: 'number', minimum: 0 },
     quantity: { type: 'number', minimum: 1 },
-    total: { type: 'number', minimum: 0 }
+    subtotal: { type: 'number', minimum: 0 }
   },
-  required: ['productId', 'productName', 'price', 'quantity', 'total'],
+  required: ['productId', 'productName', 'price', 'quantity', 'subtotal'],
   additionalProperties: false
 };
 

@@ -69,16 +69,19 @@ export class CartClient extends BaseApiClient {
     const cartResponse = await this.getCart(userId);
     
     if (cartResponse.status === 200 && cartResponse.data) {
-      const cart = cartResponse.data;
-      const total = cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      const itemCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+      const cart = (cartResponse.data as any)?.data?.data || cartResponse.data;
       
-      return {
-        status: 200,
-        data: { total, itemCount },
-        headers: cartResponse.headers,
-        url: cartResponse.url
-      };
+      if (cart && cart.items) {
+        const total = cart.items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
+        const itemCount = cart.items.reduce((sum: number, item: any) => sum + item.quantity, 0);
+        
+        return {
+          status: 200,
+          data: { total, itemCount },
+          headers: cartResponse.headers,
+          url: cartResponse.url
+        };
+      }
     }
     
     return cartResponse as any;

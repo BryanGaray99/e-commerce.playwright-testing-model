@@ -11,14 +11,14 @@ export class CartFixture {
   static createCartItem(overrides: Partial<CartItem> = {}): CartItem {
     const quantity = faker.number.int({ min: 1, max: 10 });
     const price = parseFloat(faker.commerce.price({ min: 5, max: 500 }));
-    const total = price * quantity;
+    const subtotal = price * quantity;
     
     return {
       productId: faker.string.uuid(),
       productName: faker.commerce.productName(),
       price,
       quantity,
-      total,
+      subtotal,
       ...overrides
     };
   }
@@ -34,7 +34,7 @@ export class CartFixture {
    * Calculate cart totals
    */
   static calculateCartTotals(items: CartItem[]) {
-    const totalAmount = items.reduce((sum, item) => sum + item.total, 0);
+    const totalAmount = items.reduce((sum, item) => sum + item.subtotal, 0);
     const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
     return { totalAmount, itemCount };
   }
@@ -128,7 +128,7 @@ export class CartFixture {
     
     // Recalculate totals for high-value items
     items.forEach(item => {
-      item.total = item.price * item.quantity;
+      item.subtotal = item.price * item.quantity;
     });
     
     const { totalAmount, itemCount } = this.calculateCartTotals(items);
