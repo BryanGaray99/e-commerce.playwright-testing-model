@@ -1,8 +1,8 @@
 import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 import { ordersClient, usersClient, handleApiResponse, getLastResponse, getLastError, storeCreatedEntity } from '../hooks';
-import { OrderFixture } from '../../fixtures/ecommerce_features/order.fixture';
-import { UserFixture } from '../../fixtures/ecommerce_features/user.fixture';
+import { OrderFixture } from '../../fixtures/ecommerce_fixtures/order.fixture';
+import { UserFixture } from '../../fixtures/ecommerce_fixtures/user.fixture';
 import { isValidOrder, isValidOrderList, getOrderValidationErrors } from '../../schemas/ecommerce_schemas/order.schema';
 import { OrderStatus } from '../../types/common';
 

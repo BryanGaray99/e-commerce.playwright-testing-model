@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { CategoriesClient } from '../../api/ecommerce_api/CategoriesClient';
-import { CategoryFixture } from '../../fixtures/ecommerce_features/category.fixture';
+import { CategoryFixture } from '../../fixtures/ecommerce_fixtures/category.fixture';
 import { isValidCategory, isValidCategoryList } from '../../schemas/ecommerce_schemas/category.schema';
 
 test.describe('Categories API', () => {

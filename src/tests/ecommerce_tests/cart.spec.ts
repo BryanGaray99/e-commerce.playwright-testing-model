@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { CartClient } from '../../api/ecommerce_api/CartClient';
 import { UsersClient } from '../../api/ecommerce_api/UsersClient';
-import { CartFixture } from '../../fixtures/ecommerce_features/cart.fixture';
-import { UserFixture } from '../../fixtures/ecommerce_features/user.fixture';
+import { CartFixture } from '../../fixtures/ecommerce_fixtures/cart.fixture';
+import { UserFixture } from '../../fixtures/ecommerce_fixtures/user.fixture';
 import { isValidCart } from '../../schemas/ecommerce_schemas/cart.schema';
 
 test.describe('Cart API', () => {

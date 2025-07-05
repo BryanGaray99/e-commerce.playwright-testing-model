@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { OrdersClient } from '../../api/ecommerce_api/OrdersClient';
 import { UsersClient } from '../../api/ecommerce_api/UsersClient';
-import { OrderFixture } from '../../fixtures/ecommerce_features/order.fixture';
-import { UserFixture } from '../../fixtures/ecommerce_features/user.fixture';
+import { OrderFixture } from '../../fixtures/ecommerce_fixtures/order.fixture';
+import { UserFixture } from '../../fixtures/ecommerce_fixtures/user.fixture';
 import { isValidOrder, isValidOrderList } from '../../schemas/ecommerce_schemas/order.schema';
 
 test.describe('Orders API', () => {

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { UsersClient } from '../../api/ecommerce_api/UsersClient';
-import { UserFixture } from '../../fixtures/ecommerce_features/user.fixture';
+import { UserFixture } from '../../fixtures/ecommerce_fixtures/user.fixture';
 import { isValidUser, isValidUserList } from '../../schemas/ecommerce_schemas/user.schema';
 
 test.describe('Users API', () => {

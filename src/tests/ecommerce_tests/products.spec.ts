@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { ProductsClient } from '../../api/ecommerce_api/ProductsClient';
-import { ProductFixture } from '../../fixtures/ecommerce_features/product.fixture';
+import { ProductFixture } from '../../fixtures/ecommerce_fixtures/product.fixture';
 import { isValidProduct, isValidProductList } from '../../schemas/ecommerce_schemas/product.schema';
 
 test.describe('Products API', () => {

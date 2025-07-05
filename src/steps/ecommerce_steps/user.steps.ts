@@ -1,7 +1,7 @@
 import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 import { usersClient, handleApiResponse, getLastResponse, getLastError, storeCreatedEntity } from '../hooks';
-import { UserFixture } from '../../fixtures/ecommerce_features/user.fixture';
+import { UserFixture } from '../../fixtures/ecommerce_fixtures/user.fixture';
 import { isValidUser, isValidUserList, getUserValidationErrors } from '../../schemas/ecommerce_schemas/user.schema';
 
 /**

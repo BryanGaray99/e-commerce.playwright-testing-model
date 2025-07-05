@@ -1,7 +1,7 @@
 import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 import { categoriesClient, handleApiResponse, getLastResponse, getLastError, storeCreatedEntity } from '../hooks';
-import { CategoryFixture } from '../../fixtures/ecommerce_features/category.fixture';
+import { CategoryFixture } from '../../fixtures/ecommerce_fixtures/category.fixture';
 import { isValidCategory, isValidCategoryList, getCategoryValidationErrors } from '../../schemas/ecommerce_schemas/category.schema';
 
 /**
